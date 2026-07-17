@@ -140,15 +140,40 @@ export default function PatientCheckIn() {
 
   const selectedDoctor = isClinicQueue
     ? doctors.find((d) => d.id === selectedDoctorId)
-    : queue?.doctor;
+    : null;
 
-  const waitSummary = isClinicQueue
+  const joinStatus = isClinicQueue
     ? selectedDoctor
-      ? `${selectedDoctor.waitingCount} waiting · ~${selectedDoctor.avgMinutes} min each`
-      : `${queue?.waitingCount ?? 0} waiting across clinic`
-    : queue
-      ? `${queue.waitingCount} waiting · ~${queue.avgMinutes} min each`
-      : 'Enter your details to join the queue.';
+      ? {
+          canJoin: selectedDoctor.canJoin !== false,
+          status: selectedDoctor.availabilityStatus || 'available',
+          reason: selectedDoctor.unavailableReason || selectedDoctor.availabilityReason || '',
+        }
+      : { canJoin: false, status: 'none', reason: 'Select a doctor' }
+    : {
+        canJoin: queue?.canJoin !== false,
+        status: queue?.availabilityStatus || 'available',
+        reason: queue?.unavailableReason || queue?.availabilityReason || '',
+      };
+
+  const waitSummary = !joinStatus.canJoin
+    ? joinStatus.reason || 'Check-in is closed right now'
+    : isClinicQueue
+      ? selectedDoctor
+        ? `${selectedDoctor.waitingCount} waiting · ~${selectedDoctor.avgMinutes} min each`
+        : `${queue?.waitingCount ?? 0} waiting across clinic`
+      : queue
+        ? `${queue.waitingCount} waiting · ~${queue.avgMinutes} min each`
+        : 'Enter your details to join the queue.';
+
+  // Prefer an available doctor when clinic QR loads
+  useEffect(() => {
+    if (!isClinicQueue || !doctors.length) return;
+    const current = doctors.find((d) => d.id === selectedDoctorId);
+    if (current?.canJoin) return;
+    const firstOpen = doctors.find((d) => d.canJoin);
+    if (firstOpen) setSelectedDoctorId(firstOpen.id);
+  }, [isClinicQueue, doctors, selectedDoctorId]);
 
   if (error && !queue) {
     return (
@@ -210,7 +235,7 @@ export default function PatientCheckIn() {
                 <div className="turn-banner">It&apos;s your turn — please head to the doctor&apos;s room.</div>
               )}
               <div className="ticket">
-                <div className="eyebrow">Your position</div>
+                <div className="eyebrow">Your number</div>
                 <div className={`bignum${ticket.beingSeen ? ' turn' : ''}`}>
                   {ticket.beingSeen ? '0' : ticket.position}
                 </div>
@@ -219,7 +244,7 @@ export default function PatientCheckIn() {
                     ? "you're being seen now"
                     : ticket.ahead === 0
                       ? "you're next after the current patient"
-                      : `${ticket.ahead} patient(s) ahead of you`}
+                      : `${ticket.ahead} patient(s) ahead · wait may update if someone is inserted`}
                 </div>
                 <div className="doc">{doctor.name} · {doctor.specialty}</div>
               </div>
@@ -292,79 +317,107 @@ export default function PatientCheckIn() {
         <div className="panel">
           <div className="welcome-hero">
             <div className="qricon"><IconQr /></div>
-            <h2>Complete your check-in</h2>
+            <h2>{joinStatus.canJoin ? 'Complete your check-in' : 'Check-in unavailable'}</h2>
             <p>{waitSummary}</p>
           </div>
           <div className="panel-body" style={{ paddingTop: 0 }}>
+            {!joinStatus.canJoin && !isClinicQueue ? (
+              <div className={`status-box ${joinStatus.status}`}>
+                <div className="status-title">
+                  {joinStatus.status === 'unavailable' ? 'Doctor not available' : 'Outside consultation hours'}
+                </div>
+                <div className="status-reason">{joinStatus.reason}</div>
+              </div>
+            ) : null}
+
             {isClinicQueue && (
               <div className="field">
                 <label>Select doctor</label>
                 <div className="doc-pick">
-                  {doctors.map((doc) => (
-                    <button
-                      key={doc.id}
-                      type="button"
-                      className={`opt${selectedDoctorId === doc.id ? ' sel' : ''}`}
-                      onClick={() => setSelectedDoctorId(doc.id)}
-                    >
-                      <div className="n">{doc.name}</div>
-                      <div className="w">
-                        {doc.specialty} · {doc.waitingCount} waiting · ~{doc.avgMinutes} min
-                      </div>
-                    </button>
-                  ))}
+                  {doctors.map((doc) => {
+                    const blocked = doc.canJoin === false;
+                    return (
+                      <button
+                        key={doc.id}
+                        type="button"
+                        className={`opt${selectedDoctorId === doc.id ? ' sel' : ''}${blocked ? ' blocked' : ''}`}
+                        onClick={() => setSelectedDoctorId(doc.id)}
+                      >
+                        <div className="n">{doc.name}</div>
+                        <div className="w">
+                          {blocked
+                            ? doc.unavailableReason || doc.availabilityReason || 'Unavailable'
+                            : `${doc.specialty} · ${doc.waitingCount} waiting · ~${doc.avgMinutes} min`}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
-            <div className="field">
-              <label htmlFor="pName">Full name</label>
-              <input
-                id="pName"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Ananya Rao"
-                autoComplete="name"
-              />
-            </div>
-            <div className="field">
-              <label htmlFor="pPhone">Phone number</label>
-              <input
-                id="pPhone"
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                placeholder="e.g. 98765 43210"
-                autoComplete="tel"
-              />
-            </div>
-            <button
-              className="btn-main"
-              style={{ marginTop: 4 }}
-              onClick={() =>
-                withBusy(async () => {
-                  if (isClinicQueue && !selectedDoctorId) {
-                    throw new Error('Please select a doctor');
+
+            {isClinicQueue && selectedDoctor && !joinStatus.canJoin ? (
+              <div className={`status-box ${joinStatus.status}`}>
+                <div className="status-title">
+                  {joinStatus.status === 'unavailable' ? 'Doctor not available' : 'Outside consultation hours'}
+                </div>
+                <div className="status-reason">{joinStatus.reason}</div>
+              </div>
+            ) : null}
+
+            {joinStatus.canJoin ? (
+              <>
+                <div className="field">
+                  <label htmlFor="pName">Full name</label>
+                  <input
+                    id="pName"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g. Ananya Rao"
+                    autoComplete="name"
+                  />
+                </div>
+                <div className="field">
+                  <label htmlFor="pPhone">Phone number</label>
+                  <input
+                    id="pPhone"
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="e.g. 98765 43210"
+                    autoComplete="tel"
+                  />
+                </div>
+                <button
+                  className="btn-main"
+                  style={{ marginTop: 4 }}
+                  onClick={() =>
+                    withBusy(async () => {
+                      if (isClinicQueue && !selectedDoctorId) {
+                        throw new Error('Please select a doctor');
+                      }
+                      const body = {
+                        name: name.trim() || 'You',
+                        phone: phone.trim() || '',
+                      };
+                      if (isClinicQueue) body.doctorId = selectedDoctorId;
+                      const res = await api.checkin(body);
+                      saveTicket({ ticketId: res.ticket.id, code });
+                    }, 'Checking you in…')
                   }
-                  const body = {
-                    name: name.trim() || 'You',
-                    phone: phone.trim() || '',
-                  };
-                  if (isClinicQueue) body.doctorId = selectedDoctorId;
-                  const res = await api.checkin(body);
-                  saveTicket({ ticketId: res.ticket.id, code });
-                }, 'Checking you in…')
-              }
-            >
-              <span>
-                <span className="label">Check In</span>
-                <span className="sub">
-                  {isClinicQueue && selectedDoctor
-                    ? `join ${selectedDoctor.name}`
-                    : 'join this queue'}
-                </span>
-              </span>
-              <span className="arrow"><IconArrow /></span>
-            </button>
+                >
+                  <span>
+                    <span className="label">Check In</span>
+                    <span className="sub">
+                      {isClinicQueue && selectedDoctor
+                        ? `join ${selectedDoctor.name}`
+                        : 'join this queue'}
+                    </span>
+                  </span>
+                  <span className="arrow"><IconArrow /></span>
+                </button>
+              </>
+            ) : null}
           </div>
         </div>
       </div>
