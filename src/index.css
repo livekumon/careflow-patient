@@ -1,31 +1,36 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=IBM+Plex+Mono:wght@500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@500;700&display=swap');
 
 :root {
-  --canvas: #EEF3F5;
+  --canvas: #F6F1E6;
   --surface: #FFFFFF;
-  --surface-2: #F7FAFB;
-  --line: #D5E0E5;
-  --ink: #0F2430;
-  --muted: #5A7380;
-  --brand: #0B3D4A;
-  --brand-mid: #1A6B7A;
-  --brand-soft: #E3EFF2;
-  --accent: #0F8A7A;
-  --accent-soft: #E4F5F2;
-  --warn: #C45C3A;
-  --warn-soft: #FCEEE8;
-  --warn-line: #F0C9BB;
+  --surface-2: #ECE3D0;
+  --line: #D5D0C4;
+  --ink: #10201D;
+  --muted: #5A6B64;
+  --brand: #1F5C52;
+  --brand-mid: #17322C;
+  --brand-soft: #E4EFEA;
+  --accent: #1F5C52;
+  --accent-soft: #E4EFEA;
+  --warn: #FF5A1F;
+  --warn-soft: #FFE8DF;
+  --warn-line: #FFB899;
   --radius: 14px;
   --radius-sm: 10px;
+  --nav-h: 64px;
+  --signal: #FF5A1F;
+  --paper: #F6F1E6;
+  --teal: #1F5C52;
 }
+
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body, #root { height: 100%; }
 body {
   margin: 0;
-  background: linear-gradient(180deg, #E7F0F3 0%, var(--canvas) 42%, #E9F1F3 100%);
+  background: linear-gradient(180deg, #F6F1E6 0%, var(--canvas) 42%, #ECE3D0 100%);
   color: var(--ink);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -53,7 +58,7 @@ body {
 }
 .clinic-banner .name { font-weight: 700; font-size: 15px; letter-spacing: -.02em; }
 .clinic-banner .meta {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Space Mono', monospace;
   font-size: 11px;
   opacity: .72;
   margin-top: 3px;
@@ -290,7 +295,7 @@ button:focus-visible, input:focus-visible {
 .doc-pick .opt .w {
   font-size: 11px;
   color: var(--muted);
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Space Mono', monospace;
   margin-top: 3px;
 }
 
@@ -303,7 +308,7 @@ button:focus-visible, input:focus-visible {
   font-weight: 650;
 }
 .ticket .bignum {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Space Mono', monospace;
   font-weight: 600;
   font-size: 72px;
   line-height: 1;
@@ -327,7 +332,7 @@ button:focus-visible, input:focus-visible {
 }
 .wait-card .l { font-size: 12px; color: var(--muted); font-weight: 550; }
 .wait-card .v {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Space Mono', monospace;
   font-weight: 600;
   font-size: 18px;
   color: var(--brand);
@@ -479,16 +484,16 @@ button:focus-visible, input:focus-visible {
 @media (min-width: 700px) {
   body {
     background:
-      radial-gradient(700px 340px at 70% -10%, rgba(26, 107, 122, .1), transparent 55%),
-      radial-gradient(520px 280px at 10% 0%, rgba(15, 138, 122, .08), transparent 55%),
-      #E8F0F2;
+      radial-gradient(700px 340px at 70% -10%, rgba(31, 92, 82, .12), transparent 55%),
+      radial-gradient(520px 280px at 10% 0%, rgba(255, 90, 31, .08), transparent 55%),
+      #F6F1E6;
   }
   .app {
     margin: 28px auto;
     min-height: calc(100dvh - 56px);
     border: 1px solid var(--line);
     border-radius: 28px;
-    background: linear-gradient(180deg, #F3F7F8 0%, var(--canvas) 40%);
+    background: linear-gradient(180deg, #F6F1E6 0%, var(--canvas) 40%);
     box-shadow: 0 24px 60px -28px rgba(15, 36, 48, .35);
     overflow: hidden;
   }
