@@ -193,9 +193,11 @@ export default function PatientCheckIn() {
   }
 
   if (myTicket && ticketView) {
-    const { ticket, doctor, queueDots = [] } = ticketView;
+    const { ticket, doctor, queueDots = [], nowServing = null } = ticketView;
     const completed = !!ticket.completed;
     const idx = queueDots.indexOf(myTicket.ticketId);
+    const myNumber = ticket.displayToken ?? ticket.position;
+    const nowNumber = nowServing?.displayToken;
 
     return (
       <>
@@ -235,9 +237,19 @@ export default function PatientCheckIn() {
                 <div className="turn-banner">It&apos;s your turn — please head to the doctor&apos;s room.</div>
               )}
               <div className="ticket">
-                <div className="eyebrow">Your number</div>
-                <div className={`bignum${ticket.beingSeen ? ' turn' : ''}`}>
-                  {ticket.beingSeen ? '0' : ticket.position}
+                <div className="queue-status-row">
+                  <div className="queue-status-cell">
+                    <div className="eyebrow">Now serving</div>
+                    <div className={`status-num${ticket.beingSeen ? ' turn' : ''}`}>
+                      {nowNumber != null ? nowNumber : '—'}
+                    </div>
+                  </div>
+                  <div className="queue-status-cell you">
+                    <div className="eyebrow">Your number</div>
+                    <div className={`status-num${ticket.beingSeen ? ' turn' : ''}`}>
+                      {myNumber != null ? myNumber : '—'}
+                    </div>
+                  </div>
                 </div>
                 <div className="sub">
                   {ticket.beingSeen
@@ -375,6 +387,8 @@ export default function PatientCheckIn() {
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Ananya Rao"
                     autoComplete="name"
+                    required
+                    aria-required="true"
                   />
                 </div>
                 <div className="field">
@@ -391,13 +405,18 @@ export default function PatientCheckIn() {
                 <button
                   className="btn-main"
                   style={{ marginTop: 4 }}
+                  disabled={!name.trim() || busy}
                   onClick={() =>
                     withBusy(async () => {
+                      const trimmedName = name.trim();
+                      if (!trimmedName) {
+                        throw new Error('Please enter your full name');
+                      }
                       if (isClinicQueue && !selectedDoctorId) {
                         throw new Error('Please select a doctor');
                       }
                       const body = {
-                        name: name.trim() || 'You',
+                        name: trimmedName,
                         phone: phone.trim() || '',
                       };
                       if (isClinicQueue) body.doctorId = selectedDoctorId;
@@ -409,9 +428,11 @@ export default function PatientCheckIn() {
                   <span>
                     <span className="label">Check In</span>
                     <span className="sub">
-                      {isClinicQueue && selectedDoctor
-                        ? `join ${selectedDoctor.name}`
-                        : 'join this queue'}
+                      {!name.trim()
+                        ? 'enter your name to continue'
+                        : isClinicQueue && selectedDoctor
+                          ? `join ${selectedDoctor.name}`
+                          : 'join this queue'}
                     </span>
                   </span>
                   <span className="arrow"><IconArrow /></span>

@@ -227,7 +227,11 @@ button:focus-visible, input:focus-visible {
   stroke-linejoin: round;
 }
 .btn-main:active { transform: scale(0.98); }
-.btn-main:disabled { opacity: .45; cursor: not-allowed; }
+.btn-main:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
 
 .welcome-hero {
   text-align: center;
@@ -319,6 +323,37 @@ button:focus-visible, input:focus-visible {
   color: var(--muted);
   font-weight: 650;
 }
+.queue-status-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 4px 0 14px;
+}
+.queue-status-cell {
+  padding: 14px 10px 12px;
+  border-radius: 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+.queue-status-cell.you {
+  background: var(--brand-soft, #e3eeeb);
+  border-color: rgba(31, 92, 82, 0.28);
+}
+.queue-status-cell .eyebrow {
+  margin-bottom: 4px;
+}
+.ticket .status-num {
+  font-family: 'Space Mono', monospace;
+  font-weight: 600;
+  font-size: 42px;
+  line-height: 1;
+  color: var(--ink);
+  transition: color .2s ease;
+}
+.queue-status-cell.you .status-num {
+  color: var(--brand);
+}
+.ticket .status-num.turn { color: var(--warn); }
 .ticket .bignum {
   font-family: 'Space Mono', monospace;
   font-weight: 600;
