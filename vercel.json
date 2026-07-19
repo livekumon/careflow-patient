@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://careflow-api-azure.vercel.app/api/$1" },
+    { "source": "/api/(.*)", "destination": "https://careflow-api-six.vercel.app/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
