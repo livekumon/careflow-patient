@@ -71,5 +71,5 @@ const server = createServer(async (req, res) => {
 });
 
 server.listen(PORT, HOST, () => {
-  console.log(`Careflow patient app listening on http://${HOST}:${PORT}`);
+  console.log(`Pammi.app patient listening on http://${HOST}:${PORT}`);
 });
