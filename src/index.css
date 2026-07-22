@@ -528,6 +528,57 @@ button:focus-visible, input:focus-visible {
 .loading-card span { font-size: 13px; font-weight: 650; color: var(--muted); }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+.confirm-drawer {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+  background: rgba(16, 32, 29, .4);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+.confirm-drawer.open { display: flex; }
+
+.confirm-card {
+  width: min(100%, 360px);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 20px 18px 16px;
+  box-shadow: 0 24px 48px -28px rgba(16, 32, 29, .45);
+  animation: confirmIn .2s ease;
+}
+@keyframes confirmIn {
+  from { transform: translateY(10px) scale(.98); opacity: .55; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+.confirm-card h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  letter-spacing: -.02em;
+}
+.confirm-card p {
+  margin: 0 0 16px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.confirm-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.confirm-actions .btn { width: 100%; }
+.btn-danger {
+  background: rgba(163, 59, 43, .12);
+  color: #9a3426;
+  border: 1px solid rgba(163, 59, 43, .28);
+  font-weight: 700;
+}
+
 @media (min-width: 700px) {
   body {
     background:

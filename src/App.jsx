@@ -32,6 +32,7 @@ export default function PatientCheckIn() {
   const [error, setError] = useState(null);
   const [flash, setFlash] = useState(false);
   const [lastPos, setLastPos] = useState(null);
+  const [confirmCancel, setConfirmCancel] = useState(false);
 
   const isClinicQueue = queue?.scope === 'clinic';
   const doctors = queue?.doctors || [];
@@ -202,7 +203,10 @@ export default function PatientCheckIn() {
     const completed = !!ticket.completed;
     const idx = queueDots.indexOf(myTicket.ticketId);
     const myNumber = ticket.displayToken ?? ticket.position;
-    const nowNumber = nowServing?.displayToken;
+    // Prefer API now-serving; if this patient is being seen, always show their number.
+    const nowNumber = ticket.beingSeen
+      ? (myNumber ?? nowServing?.displayToken)
+      : nowServing?.displayToken;
 
     return (
       <>
@@ -282,18 +286,10 @@ export default function PatientCheckIn() {
               <div className="note">Feel free to lock your phone — we&apos;ll refresh the moment it&apos;s your turn.</div>
               <div className="panel-body">
                 <button
+                  type="button"
                   className="btn btn-ghost"
                   style={{ width: '100%' }}
-                  onClick={() =>
-                    withBusy(async () => {
-                      try {
-                        await api.cancelTicket(myTicket.ticketId);
-                      } catch {
-                        /* ignore */
-                      }
-                      resetCheckin();
-                    }, 'Cancelling…')
-                  }
+                  onClick={() => setConfirmCancel(true)}
                 >
                   Cancel check-in
                 </button>
@@ -301,6 +297,52 @@ export default function PatientCheckIn() {
             </div>
           )}
         </div>
+
+        <div
+          className={`confirm-drawer${confirmCancel ? ' open' : ''}`}
+          aria-hidden={!confirmCancel}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="cancel-checkin-title"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setConfirmCancel(false);
+          }}
+        >
+          <div className="confirm-card">
+            <h3 id="cancel-checkin-title">Cancel check-in?</h3>
+            <p>
+              You&apos;ll leave the queue and lose your place
+              {myNumber != null ? ` (#${myNumber})` : ''}. This can&apos;t be undone.
+            </p>
+            <div className="confirm-actions">
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={() => setConfirmCancel(false)}
+              >
+                Keep my place
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={() => {
+                  setConfirmCancel(false);
+                  withBusy(async () => {
+                    try {
+                      await api.cancelTicket(myTicket.ticketId);
+                    } catch {
+                      /* ignore */
+                    }
+                    resetCheckin();
+                  }, 'Cancelling…');
+                }}
+              >
+                Yes, cancel
+              </button>
+            </div>
+          </div>
+        </div>
+
         <LoadingOverlay show={loading} message={loadingMessage} />
       </>
     );
