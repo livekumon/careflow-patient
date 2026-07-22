@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import LoadingOverlay from './components/LoadingOverlay';
 import { IconArrow, IconCheck, IconQr } from './components/Icons';
 import { createQueueApi, resolveQueueCode } from './lib/api';
@@ -18,6 +18,7 @@ function loadTicket(code) {
 export default function PatientCheckIn() {
   const code = useMemo(() => resolveQueueCode(), []);
   const api = useMemo(() => (code ? createQueueApi(code) : null), [code]);
+  const busyRef = useRef(false);
 
   const [queue, setQueue] = useState(null);
   const [selectedDoctorId, setSelectedDoctorId] = useState(null);
@@ -116,7 +117,10 @@ export default function PatientCheckIn() {
   }, [myTicket, refreshTicket]);
 
   async function withBusy(fn, message) {
-    if (busy) return;
+    // Ref guard is synchronous — React `busy` state alone can't stop double-clicks
+    // before the next render disables the button.
+    if (busyRef.current) return;
+    busyRef.current = true;
     setBusy(true);
     setLoading(true);
     setLoadingMessage(message || 'Updating…');
@@ -125,6 +129,7 @@ export default function PatientCheckIn() {
     } catch (err) {
       alert(err.message || 'Request failed');
     } finally {
+      busyRef.current = false;
       setBusy(false);
       setLoading(false);
     }
@@ -403,10 +408,13 @@ export default function PatientCheckIn() {
                   />
                 </div>
                 <button
+                  type="button"
                   className="btn-main"
                   style={{ marginTop: 4 }}
                   disabled={!name.trim() || busy}
-                  onClick={() =>
+                  aria-busy={busy}
+                  onClick={() => {
+                    if (busyRef.current || busy || !name.trim()) return;
                     withBusy(async () => {
                       const trimmedName = name.trim();
                       if (!trimmedName) {
@@ -422,8 +430,8 @@ export default function PatientCheckIn() {
                       if (isClinicQueue) body.doctorId = selectedDoctorId;
                       const res = await api.checkin(body);
                       saveTicket({ ticketId: res.ticket.id, code });
-                    }, 'Checking you in…')
-                  }
+                    }, 'Checking you in…');
+                  }}
                 >
                   <span>
                     <span className="label">Check In</span>
