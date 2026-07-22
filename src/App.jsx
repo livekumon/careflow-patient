@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import BrandLogo from './components/BrandLogo';
 import LoadingOverlay from './components/LoadingOverlay';
 import { IconArrow, IconCheck, IconQr } from './components/Icons';
 import { createQueueApi, resolveQueueCode } from './lib/api';
@@ -185,6 +186,9 @@ export default function PatientCheckIn() {
     return (
       <>
         <div className="app">
+          <div className="app-brand">
+            <BrandLogo className="brand-logo--patient" />
+          </div>
           <div className="topbar">
             <div>
               <h1>Check-in</h1>
@@ -211,6 +215,9 @@ export default function PatientCheckIn() {
     return (
       <>
         <div className={`app${loading ? ' is-loading' : ''}`}>
+          <div className="app-brand">
+            <BrandLogo className="brand-logo--patient" />
+          </div>
           {queue && (
             <div className="clinic-banner">
               <div className="name">{queue.clinic.name}</div>
@@ -351,6 +358,9 @@ export default function PatientCheckIn() {
   return (
     <>
       <div className={`app${loading ? ' is-loading' : ''}`}>
+        <div className="app-brand">
+          <BrandLogo className="brand-logo--patient" />
+        </div>
         {queue && (
           <div className="clinic-banner">
             <div className="name">{queue.clinic.name}</div>

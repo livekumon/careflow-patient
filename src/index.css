@@ -56,6 +56,25 @@ body {
 }
 .app.is-loading { pointer-events: none; opacity: .55; }
 
+.app-brand {
+  display: flex;
+  justify-content: center;
+  margin: 4px 0 14px;
+}
+
+.brand-logo {
+  display: block;
+  height: auto;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.brand-logo--patient {
+  width: min(200px, 68vw);
+  height: auto;
+}
+
 @keyframes rise {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
